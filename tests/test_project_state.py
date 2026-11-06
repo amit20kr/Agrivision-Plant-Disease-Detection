@@ -68,13 +68,22 @@ def model():
 
 @pytest.fixture(scope="module")
 def sample_images(manifest):
-    """One test-split image per class, only those actually present on disk."""
-    test = manifest[manifest["split"] == "test"].groupby("Class_Name").head(1)
+    """One test-split image per class, only those actually present on disk and readable."""
+    test = manifest[manifest["split"] == "test"]
     out = []
+    seen = set()
     for _, r in test.iterrows():
+        cls = r["Class_Name"]
+        if cls in seen:
+            continue
         p = _fix_path(r["File_Path"])
-        if os.path.exists(p):
-            out.append((p, int(r["label_idx"]), r["Class_Name"]))
+        try:
+            with open(p, "rb") as f:
+                if len(f.read(1)) == 1:
+                    out.append((p, int(r["label_idx"]), cls))
+                    seen.add(cls)
+        except OSError:
+            continue
     if len(out) < 3:
         pytest.skip("fewer than 3 real test images present on disk")
     return out

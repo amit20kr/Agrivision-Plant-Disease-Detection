@@ -48,7 +48,7 @@ def evaluate_keras(model, ds, class_names, y_true_override=None):
         y_true.extend(labels.numpy().tolist())
 
     report = classification_report(
-        y_true, y_pred, target_names=class_names, output_dict=True, zero_division=0
+        y_true, y_pred, labels=list(range(len(class_names))), target_names=class_names, output_dict=True, zero_division=0
     )
     cm = confusion_matrix(y_true, y_pred, labels=list(range(len(class_names))))
     accuracy = float(np.mean(np.array(y_true) == np.array(y_pred)))
@@ -96,7 +96,7 @@ def evaluate_tflite(tflite_path, ds, class_names):
     # actually found). Report both so a large FP32-vs-INT8 delta is
     # diagnosable from eval_report/*.json without re-running anything.
     report = classification_report(
-        y_true, y_pred, target_names=class_names, output_dict=True, zero_division=0
+        y_true, y_pred, labels=list(range(len(class_names))), target_names=class_names, output_dict=True, zero_division=0
     )
     cm = confusion_matrix(y_true, y_pred, labels=list(range(len(class_names))))
     pred_class_counts = {class_names[c]: int((np.array(y_pred) == c).sum())

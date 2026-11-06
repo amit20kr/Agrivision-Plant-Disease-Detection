@@ -188,13 +188,24 @@ def _real_sample_paths(n=6):
     if not (os.path.exists(MODEL) and os.path.exists(MANIFEST)):
         return []
     df = pd.read_csv(MANIFEST)
-    df = df[df["split"] == "test"].groupby("Class_Name").head(1)
+    df = df[df["split"] == "test"]
     out = []
+    seen = set()
     for _, r in df.iterrows():
+        cls = r["Class_Name"]
+        if cls in seen:
+            continue
         p = os.path.join(ROOT, r["File_Path"].replace("\\", "/"))
-        if os.path.exists(p):
-            out.append((p, r["Class_Name"], int(r["label_idx"])))
-    return out[:n]
+        try:
+            with open(p, "rb") as f:
+                if len(f.read(1)) == 1:
+                    out.append((p, cls, int(r["label_idx"])))
+                    seen.add(cls)
+        except OSError:
+            continue
+        if len(out) >= n:
+            break
+    return out
 
 
 @pytest.fixture(scope="module")

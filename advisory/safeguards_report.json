@@ -1,0 +1,114 @@
+{
+  "threshold": 0.3,
+  "target_selective_accuracy": 0.95,
+  "min_coverage": 0.6,
+  "val_ece": 0.054702320877386613,
+  "test_ece": 0.03408424223678696,
+  "clean_test_accuracy": 0.9391304347826087,
+  "clean_test_answered_share": 0.9855072463768116,
+  "clean_test_accuracy_on_answered": 0.9441176470588235,
+  "gate_config": {
+    "min_side": 100,
+    "min_sharpness": 44.75270565032959,
+    "max_noise_sigma": 19.09115822443941,
+    "min_brightness": 23.4725161895752,
+    "max_brightness": 174.5506338500977
+  },
+  "albumentations_version": "2.0.8",
+  "evaluate_like_estimated_noise_sigma": 40.886492453574505,
+  "clean_val_median_noise_sigma": 6.571867438143164,
+  "gate_report": [
+    {
+      "condition": "clean",
+      "n": 126,
+      "accuracy_all": 0.9286,
+      "gate_reject_rate": 0.0,
+      "accuracy_on_accepted": 0.9286,
+      "accuracy_on_rejected": NaN
+    },
+    {
+      "condition": "mild (noise 8, blur 5, dark 30)",
+      "n": 126,
+      "accuracy_all": 0.5556,
+      "gate_reject_rate": 0.0079,
+      "accuracy_on_accepted": 0.552,
+      "accuracy_on_rejected": 1.0
+    },
+    {
+      "condition": "noise 15",
+      "n": 126,
+      "accuracy_all": 0.4603,
+      "gate_reject_rate": 0.0,
+      "accuracy_on_accepted": 0.4603,
+      "accuracy_on_rejected": NaN
+    },
+    {
+      "condition": "noise 25",
+      "n": 126,
+      "accuracy_all": 0.1984,
+      "gate_reject_rate": 0.1746,
+      "accuracy_on_accepted": 0.1635,
+      "accuracy_on_rejected": 0.3636
+    },
+    {
+      "condition": "blur 15",
+      "n": 126,
+      "accuracy_all": 0.2143,
+      "gate_reject_rate": 0.2937,
+      "accuracy_on_accepted": 0.1573,
+      "accuracy_on_rejected": 0.3514
+    },
+    {
+      "condition": "evaluate.py-like",
+      "n": 126,
+      "accuracy_all": 0.0952,
+      "gate_reject_rate": 1.0,
+      "accuracy_on_accepted": NaN,
+      "accuracy_on_rejected": 0.0952
+    }
+  ],
+  "system_report": [
+    {
+      "condition": "clean",
+      "n": 126,
+      "unfiltered_accuracy": 0.9286,
+      "answered_share": 0.9841,
+      "accuracy_on_answered": 0.9355
+    },
+    {
+      "condition": "mild (noise 8, blur 5, dark 30)",
+      "n": 126,
+      "unfiltered_accuracy": 0.5556,
+      "answered_share": 0.9683,
+      "accuracy_on_answered": 0.5574
+    },
+    {
+      "condition": "noise 15",
+      "n": 126,
+      "unfiltered_accuracy": 0.4603,
+      "answered_share": 0.9841,
+      "accuracy_on_answered": 0.4677
+    },
+    {
+      "condition": "noise 25",
+      "n": 126,
+      "unfiltered_accuracy": 0.1984,
+      "answered_share": 0.8254,
+      "accuracy_on_answered": 0.1635
+    },
+    {
+      "condition": "blur 15",
+      "n": 126,
+      "unfiltered_accuracy": 0.2143,
+      "answered_share": 0.6667,
+      "accuracy_on_answered": 0.1548
+    },
+    {
+      "condition": "evaluate.py-like",
+      "n": 126,
+      "unfiltered_accuracy": 0.0952,
+      "answered_share": 0.0,
+      "accuracy_on_answered": NaN
+    }
+  ]
+}

@@ -27,7 +27,7 @@ def test_gradients_flow_to_both_heads(dummy_model):
     img = tf.random.uniform((2, 224, 224, 3))
     with tf.GradientTape() as tape:
         c_out, d_out = dummy_model(img, training=True)
-        loss = tf.reduce_mean(c_out) + tf.reduce_mean(d_out)
+        loss = tf.reduce_mean(c_out) + tf.reduce_mean(d_out[:, 0])
     grads = tape.gradient(loss, dummy_model.trainable_variables)
 
     none_grads = [v.name for v, g in zip(dummy_model.trainable_variables, grads) if g is None]
