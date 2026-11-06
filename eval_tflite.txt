@@ -1,0 +1,4 @@
+Loaded 442 rows for split='test'
+[Keras/FP32] accuracy on test (clean): 0.9276
+[TFLite/INT8] accuracy: 0.6086 (delta vs FP32: -0.3190)
+Wrote full report to eval_report\eval_test.json

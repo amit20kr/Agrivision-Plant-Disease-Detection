@@ -1,0 +1,28 @@
+# Data
+data/
+hackathon_dataset/
+temp_dataset/
+*.zip
+
+# Model artifacts -- track via Git LFS or GitHub Releases instead of raw git,
+# see PLAN.md "Artifact hosting". Remove these lines once LFS is configured
+# if you want them version-controlled directly.
+*.keras
+*.h5
+*.tflite
+
+# Secrets -- never commit Kaggle credentials
+kaggle.json
+.env
+
+# Python / notebook cruft
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.venv/
+venv/
+
+# Eval outputs (regenerable, not source)
+eval_report/
+duplicate_report.csv
+manifest.csv

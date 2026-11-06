@@ -1,0 +1,38 @@
+# ── Data ──────────────────────────────────────────────────────────────────────
+data/
+hackathon_dataset/
+temp_dataset/
+*.zip
+
+# ── Model weights (large binaries — host via Git LFS or GitHub Releases) ──────
+# Remove these lines if you configure Git LFS for .keras / .tflite tracking.
+*.keras
+*.h5
+*.tflite
+
+# ── Kaggle credentials — NEVER commit ─────────────────────────────────────────
+kaggle.json
+.env
+
+# ── Generated / reproducible artifacts ────────────────────────────────────────
+# eval_report/, manifest.csv, duplicate_report.csv are reproducible by running
+# the pipeline; do NOT ignore them here so reviewers can see the numbers.
+# (They ARE committed so the repo is readable without re-running training.)
+
+# ── Python / Jupyter cruft ────────────────────────────────────────────────────
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.venv/
+venv/
+.pytest_cache/
+
+# ── OS artefacts ──────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+
+# ── Multimedia not useful in code review ─────────────────────────────────────
+Screen recording.mp4
+
+# ── Antigravity cache ────────────────────────────────────────────────────────
+cache/

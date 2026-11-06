@@ -1,0 +1,29 @@
+plantdoc_folder,model_class,quality,role
+Bell_pepper leaf,Pepper__bell___healthy,approximate,target
+Bell_pepper leaf spot,Pepper__bell___Bacterial_spot,approximate,target
+Potato leaf early blight,Potato___Early_blight,exact,target
+Potato leaf late blight,Potato___Late_blight,exact,target
+Tomato Early blight leaf,Tomato_Early_blight,exact,target
+Tomato Septoria leaf spot,Tomato_Septoria_leaf_spot,exact,target
+Tomato leaf,Tomato_healthy,approximate,target
+Tomato leaf bacterial spot,Tomato_Bacterial_spot,exact,target
+Tomato leaf late blight,Tomato_Late_blight,exact,target
+Tomato leaf mosaic virus,Tomato__Tomato_mosaic_virus,exact,target
+Tomato leaf yellow virus,Tomato__Tomato_YellowLeaf__Curl_Virus,approximate,target
+Tomato mold leaf,Tomato_Leaf_Mold,exact,target
+Tomato two spotted spider mites leaf,Tomato_Spider_mites_Two_spotted_spider_mite,exact,excluded_too_few_images
+Apple Scab Leaf,,n/a,negative_other_crop
+Apple leaf,,n/a,negative_other_crop
+Apple rust leaf,,n/a,negative_other_crop
+Blueberry leaf,,n/a,negative_other_crop
+Cherry leaf,,n/a,negative_other_crop
+Corn Gray leaf spot,,n/a,negative_other_crop
+Corn leaf blight,,n/a,negative_other_crop
+Corn rust leaf,,n/a,negative_other_crop
+Peach leaf,,n/a,negative_other_crop
+Raspberry leaf,,n/a,negative_other_crop
+Soyabean leaf,,n/a,negative_other_crop
+Squash Powdery mildew leaf,,n/a,negative_other_crop
+Strawberry leaf,,n/a,negative_other_crop
+grape leaf,,n/a,negative_other_crop
+grape leaf black rot,,n/a,negative_other_crop

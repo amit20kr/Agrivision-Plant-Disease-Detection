@@ -1,0 +1,16 @@
+tensorflow==2.21.0
+opencv-python-headless>=4.12
+albumentations>=1.4,<3.0
+scikit-learn>=1.4,<1.6
+pandas>=2.0,<2.3
+numpy>=1.26,<2.1
+matplotlib>=3.8,<3.10
+kaggle>=1.6,<1.7
+imagehash>=4.3,<4.4
+Pillow>=10.0,<11.0
+pytest>=8.0,<10.0
+
+# Optional but recommended: ai_edge_litert replaces the deprecated
+# tf.lite.Interpreter as of TF 2.20+. evaluate.py falls back to
+# tf.lite.Interpreter automatically if this isn't installed.
+ai-edge-litert>=1.0

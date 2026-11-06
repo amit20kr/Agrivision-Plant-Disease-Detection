@@ -1,0 +1,3 @@
+Loaded 442 rows for split='test' (corrupted)
+[Keras/FP32] accuracy on test (corrupted): 0.0792
+Wrote full report to eval_report\eval_test_corrupt.json
