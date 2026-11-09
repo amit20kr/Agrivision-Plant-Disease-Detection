@@ -130,6 +130,15 @@ with tab_classify:
                 )
                 metric_c3.metric("Status", status_label)
 
+                # Concept Reasoning Bar Chart
+                _concept_batch = np.expand_dims(x_norm, axis=0)
+                _concept_outputs = model(_concept_batch, training=False)
+                _concept_scores = _concept_outputs[0].numpy()[0]
+                _concept_labels = ["Is Healthy", "Has Spots", "Is Blighted", "Complex Pathogen"]
+                _concept_df = pd.DataFrame({"Concept": _concept_labels, "Score": _concept_scores.tolist()})
+                st.bar_chart(_concept_df.set_index("Concept"))
+                st.caption("These concepts are class-derived auxiliary labels, not independently annotated.")
+
                 # Grad-CAM selection
                 st.subheader("3. Visual Explainability (Grad-CAM)")
                 class_options = [f"{p['rank']}. {p['class_name']} ({p['confidence']*100:.1f}%)" for p in top_preds]
