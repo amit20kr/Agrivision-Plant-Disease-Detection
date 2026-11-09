@@ -37,3 +37,38 @@ $env:KERAS_HOME = "$pwd\cache\keras"; pytest tests/ -q
 ```powershell
 streamlit run app/dashboard.py
 ```
+
+## 6. Quotable Metrics (source: notebook 07, cell 25)
+
+These are the only numbers approved for documentation and the README.
+
+```
+                           Metric          Value                         Source
+    Lab Test Accuracy (Committed)          92.8%     eval_report/eval_test.json
+    Lab Pipeline Control Accuracy          96.7%              nb07 control cell
+    Field Accuracy (Frozen Model)          18.9% advisory/field_gap_report.json
+  Field Accuracy 95% Bootstrap CI [16.8%, 21.2%] advisory/field_gap_report.json
+          Exact vs Approx Mapping 21.8% vs 10.0% advisory/field_gap_report.json
+                        Field ECE          0.455 advisory/field_gap_report.json
+      Quality Gate Rejection Rate           6.8% advisory/field_gap_report.json
+Other-Crop Leaf Confident Answers          24.4% advisory/field_gap_report.json
+Linear Probe CV (Frozen Features)          35.0% advisory/field_gap_report.json
+```
+
+**Allowed wording:** "A linear probe trained on PlantDoc reaches about 35%, so the frozen features carry some field signal."
+
+**Required wording:** "Confidence does not separate other-crop leaves from target crops (AUROC about 0.56): other plants still get an answer."
+
+**Do not quote:** 93.9% (partial-data figure). Do not state "gap is in the classifier head" or attribute the drop to "complex backgrounds / varied lighting / multi-leaf scenes" — these are not measured.
+
+## 7. Fresh-Clone Checklist
+```powershell
+# 1. Set KERAS_HOME
+$env:KERAS_HOME = "$pwd\cache\keras"
+# 2. Run tests (no data/ needed for static tests)
+pytest tests/ -q
+# 3. Confirm best_model.keras is tracked
+git ls-files best_model.keras
+# 4. Launch dashboard
+streamlit run app/dashboard.py
+```
