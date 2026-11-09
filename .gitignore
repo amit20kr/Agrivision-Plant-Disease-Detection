@@ -36,3 +36,6 @@ Screen recording.mp4
 
 # ── Antigravity cache ────────────────────────────────────────────────────────
 cache/
+
+# ── Deployment exception (allow 7 MB model to be deployed) ────────────────────
+!best_model.keras

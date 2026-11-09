@@ -1,0 +1,106 @@
+{
+  "pipeline_control": {
+    "lab_control_accuracy": 0.966667,
+    "status": "PASS"
+  },
+  "leakage": {
+    "near_duplicate_train_test_leakage_clusters": 10
+  },
+  "field_target_metrics": {
+    "n_samples": 1097,
+    "overall_accuracy": 0.188696,
+    "ci_95": [
+      0.16773,
+      0.212397
+    ],
+    "exact_accuracy": 0.217918,
+    "n_exact": 826,
+    "approx_accuracy": 0.099631,
+    "n_approx": 271,
+    "ece": 0.454696,
+    "gate_rejection_rate": 0.068368,
+    "acc_on_accepted": 0.190802,
+    "coverage_at_conf_95": 0.139471,
+    "acc_at_conf_95": 0.281046,
+    "confident_wrong_ge_09": 168,
+    "total_wrong": 890,
+    "per_class": {
+      "Pepper__bell___Bacterial_spot": {
+        "n": 71,
+        "accuracy": 0.1127,
+        "quality": "approximate"
+      },
+      "Pepper__bell___healthy": {
+        "n": 61,
+        "accuracy": 0.1475,
+        "quality": "approximate"
+      },
+      "Potato___Early_blight": {
+        "n": 116,
+        "accuracy": 0.1552,
+        "quality": "exact"
+      },
+      "Potato___Late_blight": {
+        "n": 105,
+        "accuracy": 0.0286,
+        "quality": "exact"
+      },
+      "Tomato_Bacterial_spot": {
+        "n": 110,
+        "accuracy": 0.0,
+        "quality": "exact"
+      },
+      "Tomato_Early_blight": {
+        "n": 88,
+        "accuracy": 0.4659,
+        "quality": "exact"
+      },
+      "Tomato_Late_blight": {
+        "n": 111,
+        "accuracy": 0.6216,
+        "quality": "exact"
+      },
+      "Tomato_Leaf_Mold": {
+        "n": 91,
+        "accuracy": 0.044,
+        "quality": "exact"
+      },
+      "Tomato_Septoria_leaf_spot": {
+        "n": 151,
+        "accuracy": 0.298,
+        "quality": "exact"
+      },
+      "Tomato__Tomato_YellowLeaf__Curl_Virus": {
+        "n": 76,
+        "accuracy": 0.1053,
+        "quality": "approximate"
+      },
+      "Tomato__Tomato_mosaic_virus": {
+        "n": 54,
+        "accuracy": 0.0,
+        "quality": "exact"
+      },
+      "Tomato_healthy": {
+        "n": 63,
+        "accuracy": 0.0317,
+        "quality": "approximate"
+      }
+    }
+  },
+  "out_of_distribution_negatives": {
+    "n_other_crop": 1470,
+    "other_crop_answered_at_08": 0.243537,
+    "auroc_confidence": 0.559902,
+    "auroc_margin": 0.548086,
+    "auroc_entropy": 0.569713
+  },
+  "feature_adaptation_baseline": {
+    "frozen_linear_probe_cv_acc": 0.350058
+  },
+  "reproduction_gate": {
+    "expected_accuracy": 0.189,
+    "tolerance": 0.04,
+    "reproduced_accuracy": 0.188696,
+    "status": "PASS"
+  }
+}
