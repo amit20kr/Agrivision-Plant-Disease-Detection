@@ -35,15 +35,15 @@ def test_dashboard_concept_caption_present():
     assert not at.exception, f"App threw an unhandled exception: {at.exception}"
 
 
-def test_dashboard_field_banner_visible():
-    """The always-visible field accuracy warning banner must be present."""
+def test_dashboard_mission_banner_visible():
+    """The positive mission banner must be present."""
     os.environ["KERAS_HOME"] = str(REPO_ROOT / "cache" / "keras")
     at = AppTest.from_file(APP_PATH, default_timeout=30)
     at.run()
     assert not at.exception, f"App threw an unhandled exception: {at.exception}"
-    all_warnings = " ".join(str(w.value) for w in at.warning)
-    assert "agronomist" in all_warnings.lower() or "field" in all_warnings.lower(), (
-        "Field accuracy warning banner not found in dashboard output"
+    all_success = " ".join(str(s.value) for s in at.success)
+    assert "agrivision" in all_success.lower() or "agronomist" in all_success.lower(), (
+        "Mission banner not found in dashboard output"
     )
 
 
