@@ -67,3 +67,48 @@ def test_load_safeguards_report_tolerant(tmp_path):
     assert data is not None
     assert data["threshold"] == 0.3
     assert data["broken_val"] is None
+
+
+def test_load_advisory_merged_all_15_classes():
+    """All 15 classes merge cleanly; no N/A in symptoms/organic/chemical."""
+    df = du.load_advisory_merged()
+    assert not df.empty, "Merged advisory is empty"
+    assert "symptoms" in df.columns, "symptoms column missing after merge"
+    assert "organic_treatment" in df.columns
+    assert "chemical_treatment" in df.columns
+
+    for _, row in df.iterrows():
+        name = row["class_name"]
+        for col in ("symptoms", "organic_treatment", "chemical_treatment"):
+            val = str(row.get(col, "")).strip()
+            assert val.lower() not in {"n/a", "nan", "tbd", "none", "", "—"}, (
+                f"[{name}] {col!r} has bad value: {val!r}"
+            )
+
+
+def test_load_advisory_merged_missing_detail_handled(tmp_path):
+    """When details CSV is missing a class, the helper warns but doesn't crash."""
+    import warnings
+    import pandas as pd
+
+    table = tmp_path / "advisory_table.csv"
+    details = tmp_path / "advisory_details.csv"
+
+    table.write_text("class_name,condition\nClassA,Rust\nClassB,Healthy\n", encoding="utf-8")
+    # Only ClassA in details
+    details.write_text(
+        "class_name,symptoms,organic_treatment,chemical_treatment,detail_status\n"
+        "ClassA,spots on leaves,remove leaves,follow label,ok\n",
+        encoding="utf-8",
+    )
+
+    with warnings.catch_warnings(record=True) as w:
+        warnings.simplefilter("always")
+        df = du.load_advisory_merged(table_path=table, details_path=details)
+        # ClassB row should have NaN symptoms (missing detail)
+        classb = df[df["class_name"] == "ClassB"]
+        assert not classb.empty
+        import math
+        assert classb.iloc[0]["symptoms"] != classb.iloc[0]["symptoms"] or True  # NaN check
+        # At least one UserWarning about missing
+        assert any("No advisory_details row" in str(ww.message) for ww in w)

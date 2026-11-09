@@ -41,6 +41,44 @@ def load_advisory_table(table_path: Union[str, Path] = "advisory/advisory_table.
     return pd.read_csv(str(path))
 
 
+def load_advisory_merged(
+    table_path: Union[str, Path] = "advisory/advisory_table.csv",
+    details_path: Union[str, Path] = "advisory/advisory_details.csv",
+) -> pd.DataFrame:
+    """Load and left-join advisory_table with advisory_details on class_name.
+
+    Returns a merged DataFrame. Rows with no matching detail entry will have
+    NaN in symptom/treatment columns — callers should check for that and show
+    'No advisory entry for this class'.
+    """
+    t_path = Path(table_path)
+    if not t_path.is_absolute():
+        t_path = ROOT / t_path
+    d_path = Path(details_path)
+    if not d_path.is_absolute():
+        d_path = ROOT / d_path
+
+    if not t_path.exists():
+        return pd.DataFrame()
+
+    table = pd.read_csv(str(t_path))
+    if not d_path.exists():
+        import warnings
+        warnings.warn(f"advisory_details.csv not found at {d_path}; symptom/treatment columns will be missing.")
+        return table
+
+    details = pd.read_csv(str(d_path))
+    merged = table.merge(details, on="class_name", how="left", suffixes=("", "_detail"))
+
+    # Warn about any class missing from details
+    missing = merged[merged["symptoms"].isna()]["class_name"].tolist()
+    if missing:
+        import warnings
+        warnings.warn(f"No advisory_details row for: {missing}")
+
+    return merged
+
+
 def load_gate_config(config_path: Union[str, Path] = "advisory/gate_config.json") -> iu.GateConfig:
     """Load quality gate configuration."""
     path = Path(config_path)

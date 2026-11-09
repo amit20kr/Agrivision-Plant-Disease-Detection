@@ -27,6 +27,18 @@ st.set_page_config(
 st.title("🌿 Plant Disease Diagnosis & Reliability Dashboard")
 st.caption("Interpretable Concept Bottleneck Model with Input Quality Safeguards & Field Domain Evaluation")
 
+# ── ALWAYS-VISIBLE FIELD-ACCURACY BANNER ─────────────────────────────────────
+_field_report_banner = du.load_field_gap_report()
+_field_acc_str = ""
+if _field_report_banner:
+    _fa = _field_report_banner.get("field_target_metrics", {}).get("overall_accuracy")
+    if _fa is not None:
+        _field_acc_str = f" On real field photos (PlantDoc) accuracy was **{_fa*100:.1f}%** and"
+st.warning(
+    f"⚠️ Trained on clean lab-style photos.{_field_acc_str} the confidence score does not reliably flag "
+    "mistakes. **Decision support only — confirm with an agronomist.**"
+)
+
 
 @st.cache_resource
 def get_cached_model():
@@ -35,7 +47,7 @@ def get_cached_model():
 
 @st.cache_data
 def get_cached_advisory():
-    return du.load_advisory_table()
+    return du.load_advisory_merged()
 
 
 @st.cache_data
@@ -130,14 +142,39 @@ with tab_classify:
                 )
                 metric_c3.metric("Status", status_label)
 
-                # Concept Reasoning Bar Chart
+                # Concept Reasoning Bar Chart (horizontal, scores as %)
                 _concept_batch = np.expand_dims(x_norm, axis=0)
                 _concept_outputs = model(_concept_batch, training=False)
                 _concept_scores = _concept_outputs[0].numpy()[0]
                 _concept_labels = ["Is Healthy", "Has Spots", "Is Blighted", "Complex Pathogen"]
-                _concept_df = pd.DataFrame({"Concept": _concept_labels, "Score": _concept_scores.tolist()})
-                st.bar_chart(_concept_df.set_index("Concept"))
-                st.caption("These concepts are class-derived auxiliary labels, not independently annotated.")
+                _concept_pct = [round(float(s) * 100, 1) for s in _concept_scores]
+                _concept_df = pd.DataFrame({
+                    "Concept": _concept_labels,
+                    "Score (%)": _concept_pct,
+                })
+                st.subheader("2b. Concept Reasoning")
+                try:
+                    import inspect as _inspect
+                    _sig = _inspect.signature(st.bar_chart)
+                    if "horizontal" in _sig.parameters:
+                        st.bar_chart(
+                            _concept_df,
+                            x="Concept",
+                            y="Score (%)",
+                            horizontal=True,
+                            sort=False,
+                            y_label="Score (%)",
+                            x_label="",
+                            height=260,
+                        )
+                    else:
+                        st.bar_chart(_concept_df.set_index("Concept"))
+                except Exception:
+                    st.bar_chart(_concept_df.set_index("Concept"))
+                st.caption(
+                    "These concepts are class-derived auxiliary labels, not independently annotated.  \n"
+                    + "  ".join(f"**{lbl}**: {pct}%" for lbl, pct in zip(_concept_labels, _concept_pct))
+                )
 
                 # Grad-CAM selection
                 st.subheader("3. Visual Explainability (Grad-CAM)")
@@ -160,20 +197,57 @@ with tab_classify:
                 img_c2.image(heatmap_rgb, caption=f"Grad-CAM Heatmap ({top_preds[selected_rank - 1]['class_name']})", use_container_width=True)
                 img_c3.image(custom_overlay, caption=f"Blended Overlay (opacity: {alpha:.2f})", use_container_width=True)
 
-                # Treatment Advisory
+                # ── AGRONOMIC ADVISORY ────────────────────────────────────────
                 st.subheader("4. Agronomic Advisory")
-                if not advisory_df.empty and "class_name" in advisory_df.columns:
-                    adv_row = advisory_df[advisory_df["class_name"] == top1["class_name"]]
-                    if not adv_row.empty:
-                        rec = adv_row.iloc[0]
-                        st.markdown(f"**Condition:** {rec.get('condition_name', top1['class_name'])}")
-                        st.markdown(f"**Symptoms:** {rec.get('symptoms', 'N/A')}")
-                        st.markdown(f"**Organic Treatment:** {rec.get('organic_treatment', 'N/A')}")
-                        st.markdown(f"**Chemical Treatment:** {rec.get('chemical_treatment', 'N/A')}")
-                    else:
-                        st.info(f"Healthy plant or standard monitoring recommended for {top1['class_name']}.")
+
+                if status_label == "Quality Rejected":
+                    st.warning(f"⚠️ Quality gate rejected this image ({', '.join(reasons)}). No advice shown.")
+                elif status_label == "Uncertain":
+                    st.info("🤔 Not sure. No advice shown — see the closest matches above.")
                 else:
-                    st.info("Advisory table is loading or healthy baseline.")
+                    # status == "Confirmed"
+                    _class_name = top1["class_name"]
+                    _is_healthy = "healthy" in _class_name.lower()
+
+                    if advisory_df.empty or "class_name" not in advisory_df.columns:
+                        st.info("Advisory table unavailable.")
+                    else:
+                        adv_rows = advisory_df[advisory_df["class_name"] == _class_name]
+                        if adv_rows.empty:
+                            st.info(f"No advisory entry for class: {_class_name}")
+                        else:
+                            rec = adv_rows.iloc[0]
+
+                            def _get(col, fallback="—"):
+                                v = rec.get(col, None)
+                                if v is None or (isinstance(v, float) and pd.isna(v)):
+                                    return fallback
+                                s = str(v).strip()
+                                return s if s else fallback
+
+                            if _is_healthy:
+                                st.success("✅ **Looks healthy!** No disease detected.")
+
+                            st.markdown(f"**Condition:** {_get('condition')}")
+                            st.markdown(f"**Symptoms:** {_get('symptoms')}")
+                            st.markdown(f"**Likely cause:** {_get('cause')}")
+                            st.markdown(f"**What to do now:** {_get('what_to_do_now')}")
+                            st.markdown(f"**Organic and cultural control:** {_get('organic_treatment')}")
+                            st.markdown(f"**Chemical control:** {_get('chemical_treatment')}")
+                            st.caption(
+                                "General guidance only, no doses. Use only products registered for this crop "
+                                "in your country, follow the label (waiting period, protective equipment), "
+                                "and confirm with your local agriculture extension office."
+                            )
+                            st.markdown(f"**Prevention:** {_get('prevention')}")
+                            st.markdown(f"**When to seek help:** {_get('when_to_seek_help')}")
+                            _src_name = _get('source_name')
+                            _src_url = _get('source_url')
+                            _src_status = _get('source_status')
+                            if _src_url and _src_url != "—":
+                                st.markdown(f"*Source: [{_src_name}]({_src_url}) — {_src_status}*")
+                            else:
+                                st.markdown(f"*Source: {_src_name}*")
         else:
             st.info("👈 Upload an image or select a sample preset from the left panel to begin.")
 
@@ -207,18 +281,38 @@ with tab_batch:
 # ── TAB 3: MODEL PERFORMANCE (LAB) ──────────────────────────────────────────
 with tab_perf:
     st.header("Committed Model Evaluation (Lab Dataset)")
-    st.markdown("""
-    **Clean Test Accuracy**: **92.8%** (410 / 442 correctly classified on full committed test split).
-    *Note:* The 5-image gap between `eval_test.json` (92.8%) and preliminary runs was verified to stem from on-demand cloud sync during earlier execution.
-    """)
+
+    # Read accuracy from eval_report/eval_test.json — no hard-coded figures
+    _eval_path = ROOT / "eval_report" / "eval_test.json"
+    _lab_acc = None
+    _eval_data = {}
+    if _eval_path.exists():
+        try:
+            import json as _json
+            _eval_data = _json.loads(_eval_path.read_text(encoding="utf-8"))
+            _lab_acc = _eval_data.get("keras", {}).get("accuracy")
+        except Exception:
+            pass
+
+    if _lab_acc is not None:
+        st.markdown(f"**Clean Test Accuracy**: **{_lab_acc*100:.1f}%** (from `eval_report/eval_test.json`).")
+    else:
+        st.markdown("**Clean Test Accuracy**: n/a (run notebook 03 to populate `eval_report/eval_test.json`).")
+
+    st.caption("Threshold and gate values were calibrated on a partial copy of the data; re-calibration pending.")
+    st.info("Results for notebooks 01–04 are in eval_report/*.json and eval_*.txt; notebook outputs are pending data download.")
 
     safeguards = du.load_safeguards_report()
     if safeguards:
         col_m1, col_m2, col_m3, col_m4 = st.columns(4)
-        col_m1.metric("Committed Accuracy", "92.8%")
-        col_m2.metric("Calibrated Threshold", f"{safeguards.get('threshold', 0.30):.2f}")
-        col_m3.metric("Test ECE", f"{safeguards.get('test_ece', 0.034):.4f}")
-        col_m4.metric("Answered Coverage", f"{safeguards.get('clean_test_answered_share', 0.98)*100:.1f}%")
+        _acc_disp = f"{_lab_acc*100:.1f}%" if _lab_acc is not None else "n/a"
+        _thresh = safeguards.get("threshold")
+        _ece = safeguards.get("test_ece")
+        _cov = safeguards.get("clean_test_answered_share")
+        col_m1.metric("Committed Accuracy", _acc_disp)
+        col_m2.metric("Calibrated Threshold", f"{_thresh:.2f}" if _thresh is not None else "n/a")
+        col_m3.metric("Test ECE", f"{_ece:.4f}" if _ece is not None else "n/a")
+        col_m4.metric("Answered Coverage", f"{_cov*100:.1f}%" if _cov is not None else "n/a")
 
         if "gate_report" in safeguards and safeguards["gate_report"]:
             st.subheader("Corruption Sweep & Quality Gate Stress Testing")
@@ -241,8 +335,8 @@ with tab_field:
         negatives = field_report.get("out_of_distribution_negatives", {})
 
         c1, c2, c3 = st.columns(3)
-        c1.metric("Lab Control Accuracy", f"{pipeline.get('lab_control_accuracy', 0.0)*100:.1f}%", f"Status: {pipeline.get('status', 'N/A')}")
-        c2.metric("Field Target Accuracy", f"{targets.get('overall_accuracy', 0.0)*100:.1f}%", f"Gate: {repro.get('status', 'N/A')}")
+        c1.metric("Lab Control Accuracy", f"{pipeline.get('lab_control_accuracy', 0.0)*100:.1f}%", f"Status: {pipeline.get('status', '—')}")
+        c2.metric("Field Target Accuracy", f"{targets.get('overall_accuracy', 0.0)*100:.1f}%", f"Gate: {repro.get('status', '—')}")
         c3.metric("Field Calibration ECE", f"{targets.get('ece', 0.0):.3f}")
 
         st.subheader("Field Metrics Summary")
