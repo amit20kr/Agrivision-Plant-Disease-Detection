@@ -77,7 +77,9 @@ with tab_classify:
                 selected_bytes = uploaded_file.read()
                 selected_name = uploaded_file.name
         else:
-            demo_dir = ROOT / "app" / "demo_samples"
+            demo_dir = ROOT / "app" / "samples"
+            if not demo_dir.exists() or not list(demo_dir.glob("*.jpg")):
+                demo_dir = ROOT / "app" / "demo_samples"
             samples = sorted(list(demo_dir.glob("*.jpg"))) if demo_dir.exists() else []
             if samples:
                 sample_map = {p.stem.replace("_", " "): p for p in samples}
