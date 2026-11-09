@@ -1,6 +1,6 @@
 # AgriVision CBM: Concept Bottleneck Model for Plant Disease Detection
 
-AgriVision CBM is an open-source machine learning pipeline implementing a two-headed Residual Concept Bottleneck Model (MobileNetV3Small backbone, 4-unit concept head, and 15-unit disease head) trained on the PlantVillage laboratory dataset across Potato, Tomato, and Pepper crops.
+AgriVision CBM is an open-source machine learning pipeline implementing a two-headed Residual Concept Bottleneck Model (MobileNetV3Small backbone, 4-unit concept head, and 15-unit disease head; model file size: 7.34 MB) trained on the PlantVillage laboratory dataset across Potato, Tomato, and Pepper crops.
 
 ### What it is and is not
 - **What it is:** A research prototype and laboratory-trained classifier evaluating concept-supervised transfer learning, corrupted test set degradation, edge quantization tradeoffs, and in-the-wild generalization.
@@ -10,13 +10,13 @@ AgriVision CBM is an open-source machine learning pipeline implementing a two-he
 
 ## Results Snapshot
 
-Every metric below is traceable directly to committed artifacts (`eval_report/eval_test.json`, `eval_report/eval_test_corrupt.json`, or `advisory/field_gap_report.json`):
+Every metric below is traceable directly to committed artifacts (`eval_report/eval_test.json`, `eval_report/eval_test_corrupt.json`, `eval_tflite.txt`, or `advisory/field_gap_report.json`):
 
 | Evaluation Track | Metric | Value | Reference File / Source |
 |---|---|---|---|
 | **Clean Lab Test (FP32)** | Accuracy (n=442) | **92.8%** (410/442) | `eval_report/eval_test.json` |
 | **Corrupted Lab Test** | Accuracy under blur/noise | **7.9%** (35/442) | `eval_report/eval_test_corrupt.json` |
-| **Edge Quantization (INT8)** | Post-training TFLite accuracy | **60.9%** (−31.9 pp) | `notebooks/03` execution output |
+| **Edge Quantization (INT8)** | Post-training TFLite accuracy | **60.9%** (−31.9 pp) | `eval_tflite.txt` |
 | **Field Reality (PlantDoc)** | Overall accuracy (frozen model) | **18.9%** | `advisory/field_gap_report.json` |
 | **Field Bootstrap 95% CI** | Empirical confidence interval | **[16.8%, 21.2%]** | `advisory/field_gap_report.json` |
 | **Field Class Mapping** | Exact vs Approximate mapping | **21.8% vs 10.0%** | `advisory/field_gap_report.json` |
@@ -24,6 +24,8 @@ Every metric below is traceable directly to committed artifacts (`eval_report/ev
 | **Quality Gate Rejection** | Rejection rate on field photos | **6.8%** | `advisory/field_gap_report.json` |
 | **OOD Other-Crop Leaves** | Confidently answered (conf ≥ 0.80) | **24.4%** | `advisory/field_gap_report.json` |
 | **Feature Probe Baseline** | Linear probe 5-fold grouped CV | **35.0%** | `advisory/field_gap_report.json` |
+
+> **Execution Note on Notebooks 01–04:** Results for 01–04 are in `eval_report/*.json` and `eval_*.txt`; notebook outputs are pending data download.
 
 ### Notebook 07 Section 24 Claims Table (Verbatim)
 
@@ -58,15 +60,16 @@ All project workflows are arranged sequentially in `notebooks/`:
 7. **`07_Field_Reality_Check.ipynb`**: Evaluation on in-the-wild Cropped-PlantDoc data, out-of-distribution negative crop screening, linear probe baseline, and gap report generation.
 
 **Execution Order:** `01` → `02` (recipe only, skip execution) → `03` → `04` → `05` → `06` → `07`.
+*(Note: Results for 01–04 are in eval_report/*.json and eval_*.txt; notebook outputs are pending data download.)*
 
 ---
 
 ## Safeguards & Advisory (Notebooks 05 & 06)
 
 Notebook 05 introduces an operational quality gate and confidence safeguard layer before predictions reach downstream users:
-- **Quality Gate:** Checks input image characteristics (Laplacian variance for blur, luminance statistics for underexposure/overexposure, and color balance) before inference.
+- **Quality Gate (`advisory/gate_config.json`):** Evaluates input images against configured thresholds: minimum dimension (`min_side`: 100 px), minimum sharpness (`min_sharpness`: 44.75), maximum Gaussian noise sigma (`max_noise_sigma`: 19.09), minimum brightness (`min_brightness`: 23.47), and maximum brightness (`max_brightness`: 174.55).
 - **Confidence Filtering & Rejection:** Rejects low-confidence inferences to reduce unvetted erroneous recommendations.
-- **Agronomic Advisory (Notebook 06):** Maps accepted disease predictions to severity tiers, chemical interventions, organic alternatives, and safety warnings (`advisory/advisory_table.csv`).
+- **Agronomic Advisory Table (`advisory/advisory_table.csv`):** Maps conditions to structured guidance containing: `crop`, `condition`, `is_healthy`, `category`, `cause`, `what_to_do_now`, `prevention`, `when_to_seek_help`, `source_name`, `source_url`, and `source_status`. Provides general cultural management steps and safety disclaimers (no specific chemical dosages, brand names, or severity estimates).
 
 > **Status Notice:** Calibrated on a partial copy of the data (cloud-sync gap); re-calibration on the full data is pending.
 
@@ -74,11 +77,11 @@ Notebook 05 introduces an operational quality gate and confidence safeguard laye
 
 ## Streamlit Dashboard
 
-The interactive web dashboard (`app/dashboard.py`) provides an operational interface:
-- **Classify & Explain:** Real-time upload or demo preset selection, top-3 disease probabilities, intermediate concept activation scores, and gradient-weighted Grad-CAM overlays.
-- **Batch Processing:** Multi-image upload with CSV export of predictions and quality gate flags.
-- **Lab Performance:** Committed test set benchmarks, confusion matrix metrics, and corruption robustness comparisons.
-- **Field Reality:** PlantDoc field reality check metrics, out-of-distribution rejection statistics, and analytical figures.
+The interactive web dashboard (`app/dashboard.py`) provides an operational interface with four dedicated views:
+- **Single Leaf Diagnosis & Explainability:** Supports direct image upload or preset sample selection; computes top-3 predictions with confidence scores and margin to rank-2; evaluates input quality against the quality gate; renders interactive Grad-CAM heatmap overlays with adjustable blend opacity and a radio selector to switch the explained class; and displays the corresponding advisory guidance card.
+- **Batch Processing:** Allows multi-image upload with real-time inference and downloadable CSV summary including quality gate flags and top predictions.
+- **Lab Performance:** Displays committed test set benchmarks, confusion matrix analysis, and corruption robustness comparisons.
+- **Field Reality:** Displays in-the-wild PlantDoc benchmark metrics, out-of-distribution rejection statistics, and the 6 analytical figures.
 
 ### Running Locally
 ```powershell
@@ -95,7 +98,7 @@ streamlit run app/dashboard.py
 ## Project History
 
 - **Version 1 (v1-baseline):** Initial course baseline repository including dataset split (`manifest.csv`), trained model (`best_model.keras`), clean/corrupted test evaluation, INT8 quantization, and notebooks 01–04. Link to earlier repository: <OLD REPO URL>.
-- **Version 2 (v2):** Maintains the identical model weights, dataset split, and baseline numbers, while introducing operational quality gating, agronomic advisory lookup, in-the-wild field reality evaluation (PlantDoc), the interactive Streamlit dashboard, and a 98-test test suite. v2 adds rigorous empirical validation, not new performance claims.
+- **Version 2 (v2):** Maintains the identical model weights (7.34 MB), dataset split, and baseline numbers, while introducing operational quality gating, agronomic advisory lookup, in-the-wild field reality evaluation (PlantDoc), the interactive Streamlit dashboard, and an automated pytest suite. v2 adds rigorous empirical validation, not new performance claims.
 
 ---
 
@@ -147,11 +150,12 @@ plant_disease_detection/
 │   ├── field_evaluation.py          # Field metrics support
 │   ├── make_demo_samples.py         # Sample preset preparation
 │   └── requirements.txt             # Development environment dependencies
-├── tests/                           # 98-test automated pytest suite
+├── tests/                           # Automated pytest suite
 ├── eval_report/
 │   ├── eval_test.json               # Committed clean test results (FP32)
 │   └── eval_test_corrupt.json       # Committed corrupted test results
-├── best_model.keras                 # Frozen trained model (~7.7 MB)
+├── eval_tflite.txt                  # INT8 evaluation summary
+├── best_model.keras                 # Frozen trained model (7.34 MB)
 ├── manifest.csv                     # Stratified dataset split specification
 ├── duplicate_report.csv             # Near-duplicate scan results
 ├── DEPLOY.md                        # Deployment runbook
@@ -160,7 +164,7 @@ plant_disease_detection/
 ```
 
 ### Running Tests
-The automated test suite contains 98 test items covering pipeline mechanics, data integrity, model loading, dashboard utilities, and field analysis:
+The automated test suite covers pipeline mechanics, data integrity, model loading, dashboard utilities, and field analysis:
 ```powershell
 $env:KERAS_HOME = "$pwd\cache\keras"
 pytest tests/ -q

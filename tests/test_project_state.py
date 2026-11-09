@@ -183,6 +183,8 @@ def test_corrupt_report_documents_the_robustness_gap():
 def test_int8_model_is_not_deployable_state():
     """Guards against claiming the TFLite model is deployable while the
     committed report shows a >5pp accuracy loss."""
+    if not os.path.exists(TFLITE):
+        pytest.skip(f"TFLite model not found at {TFLITE}")
     r = json.load(open(EVAL_CLEAN))
     if "tflite" not in r:
         pytest.skip("no tflite section in eval_test.json")

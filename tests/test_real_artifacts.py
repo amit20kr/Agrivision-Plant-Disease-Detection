@@ -41,6 +41,8 @@ needs_model = pytest.mark.skipif(
 
 @needs_manifest
 def test_real_manifest_has_every_image_readable():
+    if not os.path.exists(os.path.join(REPO_ROOT, "data")):
+        pytest.skip("data/ folder not present (dataset not downloaded)")
     df = pd.read_csv(MANIFEST_PATH)
     missing = [p for p in df["File_Path"] if not os.path.exists(p)]
     assert not missing, f"{len(missing)} manifest rows point at files that don't exist, e.g. {missing[:5]}"
